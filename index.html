@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeScan - Malware Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            text-align: center;
+            padding: 30px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 50%;
+            margin: auto;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+        .container:hover {
+            transform: scale(1.02);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ff6b81;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .safe {
+            color: #2ed573;
+        }
+        .malware {
+            color: #ff4757;
+        }
+        .loader {
+            display: none;
+            margin: 15px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff4757;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🛡 SafeScan - File Malware Scanner</h1>
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">🔍 Scan File</button>
+        <div class="loader" id="loader"></div>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const loader = document.getElementById("loader");
+            const resultDiv = document.getElementById("result");
+
+            if (fileInput.files.length === 0) {
+                alert("Please select a file to scan.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            loader.style.display = "block";
+            resultDiv.innerHTML = ""; // Clear previous result
+
+            fetch("http://localhost:5000/scan", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display = "none";
+                if (data.malicious) {
+                    resultDiv.innerHTML = "⚠️ Malware Detected!";
+                    resultDiv.className = "result malware";
+                } else {
+                    resultDiv.innerHTML = "✅ No Threats Found.";
+                    resultDiv.className = "result safe";
+                }
+            })
+            .catch(error => {
+                loader.style.display = "none";
+                console.error("Error scanning file:", error);
+                alert("Error scanning file. Please try again.");
+            });
+        }
+    </script>
+
+</body>
+</html>
+
